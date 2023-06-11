@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 public class ChromeHandler {
 	
-	private void setup()
+	public void setup()
 	{
 		WebDriverManager.chromedriver().setup();
 		ChromeOptions chromeOptions = new ChromeOptions();
