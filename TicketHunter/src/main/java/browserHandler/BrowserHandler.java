@@ -3,27 +3,31 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import java.util.concurrent.ThreadLocalRandom;
 
 import java.time.Duration;
 import java.util.HashMap;
 
-abstract class BrowserHandler {
+public abstract class BrowserHandler {
 	
-	BrowserHandler(WebDriver driver, HashMap<String, String> infor)
+	public BrowserHandler()
 	{
-		this.m_driver = driver;
-		this.m_infor = infor;
+		System.out.println("Initialize BrowserHandler");
 	}
 	
-	abstract void setup();
-	
-	public void waiting_machine(By element, Duration timeout)
+	public int getRandomValue(int Min, int Max)
 	{
-		WebDriverWait wait = new WebDriverWait(this.m_driver, timeout);
+		return ThreadLocalRandom.current().nextInt(Min, Max);
+	}
+	
+	public void waiting_machine(WebDriver driver, long timeoutInSecond, By element)
+	{
+		Duration timeout = Duration.ofSeconds(timeoutInSecond);
+		WebDriverWait wait = new WebDriverWait(driver, timeout);
 		wait.until(ExpectedConditions.visibilityOfElementLocated(element));
 	}
-
-	private
-		WebDriver m_driver;
-		HashMap<String, String> m_infor;
+	
+	abstract protected void setup();
+	
+	abstract public void start();
 }

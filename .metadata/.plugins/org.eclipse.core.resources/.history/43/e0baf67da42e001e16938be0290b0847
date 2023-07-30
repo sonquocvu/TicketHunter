@@ -1,0 +1,66 @@
+package browserHandler;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import io.github.bonigarcia.wdm.WebDriverManager;
+import java.util.Arrays;
+
+public class ChromeHandler extends BrowserHandler{
+	
+	public ChromeHandler()
+	{
+		super();
+		setup();
+		System.out.println("Initilinze ChromeHandler");
+	}
+	
+	protected void setup()
+	{
+		String user = System.getProperty("user.name");
+		String userDataPath = String.format("user-data-dir=C:\\Users\\%s\\AppData\\Local\\Google\\Chrome\\User Data", user);
+		System.out.printf("The userDataPath: %s\n", userDataPath);
+		
+		WebDriverManager.chromedriver().setup();
+		ChromeOptions chromeOptions = new ChromeOptions();
+		chromeOptions.addArguments("disable-notification");
+		chromeOptions.addArguments("start-maximized");
+		chromeOptions.addArguments(userDataPath);
+		chromeOptions.addArguments("profile-directory=Default");
+		chromeOptions.setExperimentalOption("useAutomationExtension", false);
+		chromeOptions.setExperimentalOption("excludeSwitches", Arrays.asList("disable-popup-blocking", "enable-automation"));
+		this.m_chromeDriver = new ChromeDriver( );
+	}
+	
+	public void start()
+	{
+		boolean isExceptionCatched = false;
+		while (true)
+		{
+			try
+			{
+				this.m_chromeDriver.get("https://ticketbox.vn/event/kich-thanh-xa-bach-xa-86983?opm=tbox.searchlistcategory.list.7");
+				waiting_machine(this.m_chromeDriver, 3, By.xpath("//h3[contains(text(), 'Lịch sự kiện')]"));
+			}
+			catch (Exception e)
+			{
+				System.out.println("Cannot access web page due to timeout.");
+				isExceptionCatched = true;
+			}
+			finally
+			{
+				if (!isExceptionCatched)
+				{
+					System.out.println("Access web page successfully.")
+					break;
+				}			
+			}
+		}
+	}
+	
+	private
+		WebDriver m_chromeDriver;
+
+}
+ 

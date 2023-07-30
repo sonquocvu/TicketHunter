@@ -1,0 +1,41 @@
+package browserHandler;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import io.github.bonigarcia.wdm.WebDriverManager;
+import java.util.Arrays;
+
+public class ChromeHandler extends BrowserHandler{
+	
+	ChromeHandler()
+	{
+		setup();
+		super(this.m_chromeDriver);
+	}
+	
+	protected void setup()
+	{
+		String user = System.getProperty("user.name");
+		WebDriverManager.chromedriver().setup();
+		ChromeOptions chromeOptions = new ChromeOptions();
+		chromeOptions.addArguments("disable-notification");
+		chromeOptions.addArguments("start-maximized");
+		chromeOptions.addArguments("user-data-dir=C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\User Data");
+		chromeOptions.addArguments("profile-directory=Default");
+		chromeOptions.setExperimentalOption("useAutomationExtension", false);
+		chromeOptions.setExperimentalOption("excludeSwitches", Arrays.asList("disable-popup-blocking", "enable-automation"));
+		this.m_chromeDriver = new ChromeDriver(chromeOptions);
+	}
+	
+	public void start()
+	{
+		m_chromeDriver.get("https://ticketbox.vn/event/kich-thanh-xa-bach-xa-86983?opm=tbox.searchlistcategory.list.7");
+	}
+	
+	private
+		WebDriver m_chromeDriver;
+
+}
+ 

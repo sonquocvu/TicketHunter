@@ -1,0 +1,32 @@
+package browserHandler;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+
+import java.time.Duration;
+import java.util.HashMap;
+
+public abstract class BrowserHandler {
+	
+	BrowserHandler()
+	{
+		System.out.println("Initialize BrowserHandler");
+	}
+	
+	public void waiting_machine(WebDriver driver, Duration timeout, By element)
+	{
+		Duration timeout = Duration.ofSeconds(5);
+		WebDriverWait wait = new WebDriverWait(m_driver, timeout);
+		wait.until(ExpectedConditions.visibilityOfElementLocated(element));
+	}
+	
+	abstract protected void setup();
+	
+	abstract protected void select_seat();
+	
+	abstract public void start();
+	
+	private
+		WebDriver m_driver;
+}
