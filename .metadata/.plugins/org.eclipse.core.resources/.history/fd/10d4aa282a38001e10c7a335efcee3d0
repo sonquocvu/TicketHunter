@@ -1,0 +1,61 @@
+package stageHandler;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import com.fasterxml.jackson.databind.*;
+
+
+public class stageData {
+	stageData()
+	{
+		this.stageJsonPath = "D:\\Work\\Java\\TicketHunter\\TicketHunter\\data\\stages.json";
+	}
+	
+	stageData(String stageName)
+	{
+		this.stageName = stageName;
+		this.stageJsonPath = "D:\\Work\\Java\\TicketHunter\\TicketHunter\\data\\stages.json";
+		loadStageData();
+	}
+	
+	public Map<String, List<List<String>>> getStageData()
+	{
+		return this.stageDataMap;
+	}
+	
+	public Map<String, List<List<String>>> getStageData(String stageName)
+	{
+		this.stageName = stageName;
+		loadStageData();
+		return this.stageDataMap;
+	}
+	
+	private void loadStageData()
+	{
+		try
+		{
+			// Get appropriate stage
+			byte[] stageJsonData = Files.readAllBytes(Paths.get(this.stageJsonPath));
+			ObjectMapper objectMapper = new ObjectMapper();
+			JsonNode stages = objectMapper.readTree(stageJsonData);
+			JsonNode stage = stages.path(this.stageName);
+			
+			// Convert Json stage to Map
+			//this.stageDataMap = new HashMap<String, List<List<String>>>();
+			stageDataMap = objectMapper.convertValue(stage, new TypeReference<HashMap<String, List<List<String>>>>(){});
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	private
+		String stageName;
+		Map<String, List<List<String>>> stageDataMap;
+		final String stageJsonPath;
+}

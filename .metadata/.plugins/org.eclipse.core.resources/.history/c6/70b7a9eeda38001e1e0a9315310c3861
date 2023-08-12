@@ -1,0 +1,209 @@
+package browserHandler;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+
+import java.util.List;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.concurrent.ThreadLocalRandom;
+import java.time.Duration;
+import stageHandler.stageData;
+
+public abstract class BrowserHandler {
+	
+	public BrowserHandler(String stageName, String rowName, String url, String lastName, String firstName, String email, String phone)
+	{
+		this.m_stageName = stageName;
+		this.m_row = rowName;
+		this.m_url = url;
+		
+		this.m_infor = new HashMap<String, String>();
+		this.m_infor.put("lastName", lastName);
+		this.m_infor.put("firstName", firstName);
+		this.m_infor.put("email", email);
+		this.m_infor.put("confirmEmail", email);
+		this.m_infor.put("phone", phone);
+		
+		this.m_stageData = new stageData(stageName, rowName);
+		this.m_rowList = m_stageData.getRowList();
+	}
+	
+	public void start()
+	{
+		accessEvent();
+		selectSeats();
+		fillInfor("Vu Quoc", "Son", "vuquocson1995@gmail.com", "0979093748");
+	}
+	
+	private void accessEvent()
+	{
+		// Access web page
+		boolean isExceptionCatched = false;
+		while (true)
+		{
+			try
+			{
+				isExceptionCatched = false;
+				this.m_webDriver.get("https://ticketbox.vn/event/kich-thanh-xa-bach-xa-86983?opm=tbox.searchlistcategory.list.7");
+				waiting_machine(this.m_webDriver, 3, By.xpath("//h3[contains(text(), 'Lịch sự kiện')]"));
+			}
+			catch (Exception e)
+			{
+				isExceptionCatched = true;
+				System.out.println("Cannot access web page due to timeout. Let's try again.");
+			}
+			finally
+			{
+				if (!isExceptionCatched)
+				{
+					System.out.println("Access web page successfully.");
+					break;
+				}
+			}
+		}
+		
+		// Look for opening event to buy ticket
+		List<WebElement> events;
+		while (true)
+		{
+			events = this.m_webDriver.findElements(By.xpath("//a[contains(@data-href, '/event/')]"));
+			if (events.size() > 0)
+			{
+				System.out.println("Find out opening events. Let's select event in the next move.");
+				break;
+			}
+			else
+			{
+				try
+				{
+					this.m_webDriver.navigate().refresh();
+					waiting_machine(this.m_webDriver, 10, By.xpath("//h3[contains(text(), 'Lịch sự kiện')]"));
+				}
+				catch (Exception e)
+				{
+					System.out.println("Cannot refresh web page due to timeout.");
+				}
+			}
+		}
+		
+		// Select random event to buy ticket
+		while (true)
+		{
+			int event_pos = getRandomValue(0, events.size());
+			try
+			{
+				isExceptionCatched = false;
+				events.get(event_pos).click();
+				waiting_machine(this.m_webDriver, 5, By.xpath("//a[contains(text(), 'Nhập mã giảm giá')]"));
+			}
+			catch (Exception e)
+			{
+				isExceptionCatched = true;
+				System.out.println("Cannot select event due to timeout. Let's pick another event.");
+			}
+			finally
+			{
+				if (!isExceptionCatched)
+				{
+					System.out.println("Select event successfully. Let's select seats in the next move.");
+					break;
+				}
+			}
+		}
+	}
+	
+	private void selectSeats()
+	{
+		WebElement seat, nextSeat;
+		String xpath;
+		int rowSize = this.m_rowList.size() - 1;
+		int i = 0;
+		
+		while (i < rowSize)
+		{
+			xpath = String.format("//*[@cx=%s and @cy=%s]", m_rowList.get(i).get(0), m_rowList.get(i).get(1));
+			seat = m_webDriver.findElement(By.xpath(xpath));
+			
+			if (seat != null && seat.getAttribute("style").contains("rgb(255, 255, 255)"))
+			{
+				xpath = String.format("//*[@cx=%s and @cy=%s]", m_rowList.get(i+1).get(0), m_rowList.get(i+1).get(1));
+				nextSeat = m_webDriver.findElement(By.xpath(xpath));
+				
+				if (nextSeat != null && nextSeat.getAttribute("style").contains("rgb(255, 255, 255)"))
+				{
+					seat.click();
+					seat.click();
+					nextSeat.click();
+					break;
+				}
+				else
+				{
+					i = i+2;
+				}
+			}
+			else
+			{
+				i++;
+			}
+		}
+		
+		boolean isTicketSubmitted = false;
+		while (!isTicketSubmitted)
+		{
+			try
+			{
+				m_webDriver.findElement(By.xpath("//table[@ng-click='submitTicketInfo()']")).click();
+				waiting_machine(this.m_webDriver, 10, By.xpath("lastname"));
+				isTicketSubmitted = true;
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private void fillInfor(String lastName, String firstName, String email, String Phone)
+	{
+		WebElement attr;
+		for (Map.Entry<String, String> entry : this.m_infor.entrySet())
+		{
+			attr = m_webDriver.findElement(By.name(entry.getKey()));
+			attr.clear();
+			attr.sendKeys(entry.getValue());
+			attr.sendKeys(Keys.ENTER);
+		}
+		
+		
+	}
+	
+	private int getRandomValue(int Min, int Max)
+	{
+		return ThreadLocalRandom.current().nextInt(Min, Max);
+	}
+	
+	private void waiting_machine(WebDriver driver, long timeoutInSecond, By element)
+	{
+		Duration timeout = Duration.ofSeconds(timeoutInSecond);
+		WebDriverWait wait = new WebDriverWait(driver, timeout);
+		wait.until(ExpectedConditions.visibilityOfElementLocated(element));
+	}
+	
+	abstract protected void setup();
+	
+	protected
+		WebDriver m_webDriver;
+	
+	private
+		stageData m_stageData;
+		String m_stageName;
+		String m_row;
+		String m_url;
+		Map<String, String> m_infor;
+		List<List<String>> m_rowList;
+}

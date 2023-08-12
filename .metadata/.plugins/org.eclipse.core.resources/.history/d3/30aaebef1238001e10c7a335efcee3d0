@@ -1,0 +1,20 @@
+package stageHandler;
+import java.util.*;
+
+public class stageData {
+	stageData(String stageName)
+	{
+		this.stageName = stageName;
+		this.stageJson = "D:\\Work\\Java\\TicketHunter\\TicketHunter\\data\\stages.json";
+	}
+	
+	public Map<String, List> getStageData()
+	{
+		
+	}
+	
+	private
+		String stageName;
+		Map<String, List> stageData;
+		final String stageJson;
+}

@@ -1,0 +1,42 @@
+package stageHandler;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import com.fasterxml.jackson.databind.*;
+
+
+public class stageData {
+	stageData(String stageName)
+	{
+		this.stageName = stageName;
+		this.stageJsonPath = "D:\\Work\\Java\\TicketHunter\\TicketHunter\\data\\stages.json";
+		this.stageData = new HashMap<String, List>();
+	}
+	
+	public Map<String, List> getStageData()
+	{
+		return this.stageData;
+	}
+	
+	private void loadStageData()
+	{
+		try
+		{
+			byte[] stageJsonData = Files.readAllBytes(Paths.get(this.stageJsonPath));
+			
+		}
+		catch (IOException e)
+		{	
+			e.printStackTrace();
+		}
+	}
+	
+	private
+		String stageName;
+		Map<String, List> stageData;
+		final String stageJsonPath;
+}

@@ -1,0 +1,149 @@
+package browserHandler;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
+import java.time.Duration;
+import stageHandler.stageData;
+
+public abstract class BrowserHandler {
+	
+	public BrowserHandler(String stageName, String rowName, String url)
+	{
+		this.m_stageName = stageName;
+		this.m_row = rowName;
+		this.m_url = url;
+		
+		this.m_stageData = new stageData(stageName, rowName);
+		this.m_rowList = m_stageData.getRowList();
+	}
+	
+	public void start()
+	{
+		accessEvent();
+		selectSeats();
+		fillInfor();
+	}
+	
+	private void accessEvent()
+	{
+		// Access web page
+		boolean isExceptionCatched = false;
+		while (true)
+		{
+			try
+			{
+				isExceptionCatched = false;
+				this.m_webDriver.get("https://ticketbox.vn/event/kich-thanh-xa-bach-xa-86983?opm=tbox.searchlistcategory.list.7");
+				waiting_machine(this.m_webDriver, 3, By.xpath("//h3[contains(text(), 'Lịch sự kiện')]"));
+			}
+			catch (Exception e)
+			{
+				isExceptionCatched = true;
+				System.out.println("Cannot access web page due to timeout. Let's try again.");
+			}
+			finally
+			{
+				if (!isExceptionCatched)
+				{
+					System.out.println("Access web page successfully.");
+					break;
+				}
+			}
+		}
+		
+		// Look for opening event to buy ticket
+		List<WebElement> events;
+		while (true)
+		{
+			events = this.m_webDriver.findElements(By.xpath("//a[contains(@data-href, '/event/')]"));
+			if (events.size() > 0)
+			{
+				System.out.println("Find out opening events. Let's select event in the next move.");
+				break;
+			}
+			else
+			{
+				try
+				{
+					this.m_webDriver.navigate().refresh();
+					waiting_machine(this.m_webDriver, 10, By.xpath("//h3[contains(text(), 'Lịch sự kiện')]"));
+				}
+				catch (Exception e)
+				{
+					System.out.println("Cannot refresh web page due to timeout.");
+				}
+			}
+		}
+		
+		// Select random event to buy ticket
+		while (true)
+		{
+			int event_pos = getRandomValue(0, events.size());
+			try
+			{
+				isExceptionCatched = false;
+				events.get(event_pos).click();
+				waiting_machine(this.m_webDriver, 5, By.xpath("//a[contains(text(), 'Nhập mã giảm giá')]"));
+			}
+			catch (Exception e)
+			{
+				isExceptionCatched = true;
+				System.out.println("Cannot select event due to timeout. Let's pick another event.");
+			}
+			finally
+			{
+				if (!isExceptionCatched)
+				{
+					System.out.println("Select event successfully. Let's select seats in the next move.");
+					break;
+				}
+			}
+		}
+	}
+	
+	private void selectSeats()
+	{
+		List<WebElement> seats = new ArrayList<WebElement>();
+		int numOfSeats = 0;
+		
+		for (int i=0; i<this.m_rowList.size(); i++)
+		{
+			
+		}
+	}
+	
+	private void fillInfor()
+	{
+		
+	}
+	
+	private int getRandomValue(int Min, int Max)
+	{
+		return ThreadLocalRandom.current().nextInt(Min, Max);
+	}
+	
+	private void waiting_machine(WebDriver driver, long timeoutInSecond, By element)
+	{
+		Duration timeout = Duration.ofSeconds(timeoutInSecond);
+		WebDriverWait wait = new WebDriverWait(driver, timeout);
+		wait.until(ExpectedConditions.visibilityOfElementLocated(element));
+	}
+	
+	abstract protected void setup();
+	
+	protected
+		WebDriver m_webDriver;
+	
+	private
+		stageData m_stageData;
+		String m_stageName;
+		String m_row;
+		String m_url;
+		List<List<String>> m_rowList;
+}
